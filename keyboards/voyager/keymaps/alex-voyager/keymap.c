@@ -25,12 +25,12 @@ enum layers {
 #define M_EC MT(MOD_RCTL, KC_E)
 #define M_NS MT(MOD_RSFT, KC_N)
 #define M_DOTA MT(MOD_RALT, KC_DOT)
-#define LT_ESC LT(KC_ESC, _MEDIA)
-#define LT_TAB LT(KC_TAB, _SYMR)
-#define LT_SPC LT(KC_SPC, _NAV)
-#define LT_DEL LT(KC_DEL, _FUNC)
-#define LT_BSPC LT(KC_BSPC, _SYML)
-#define LT_ENT LT(KC_ENT, _NUM)
+#define LT_ESC LT(_MEDIA, KC_ESC)
+#define LT_TAB LT(_SYMR, KC_TAB)
+#define LT_SPC LT(_NAV, KC_SPC)
+#define LT_DEL LT(_FUNC, KC_DEL)
+#define LT_BSPC LT(_SYML, KC_BSPC)
+#define LT_ENT LT(_NUM, KC_ENT)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_BASE] = LAYOUT_voyager(
