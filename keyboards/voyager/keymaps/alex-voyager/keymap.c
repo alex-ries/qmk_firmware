@@ -26,11 +26,47 @@ enum layers {
 #define M_NS MT(MOD_RSFT, KC_N)
 #define M_DOTA MT(MOD_RALT, KC_DOT)
 #define LT_ESC LT(_MEDIA, KC_ESC)
-#define LT_TAB LT(_SYMR, KC_TAB)
-#define LT_SPC LT(_NAV, KC_SPC)
+#define LT_TAB TD(TDM_TABDTSL)
+#define LT_SPC LT(_SYMR, KC_SPC)
 #define LT_DEL LT(_FUNC, KC_DEL)
 #define LT_BSPC LT(_SYML, KC_BSPC)
 #define LT_ENT LT(_NUM, KC_ENT)
+
+/*
+ * Tap Dance Defs
+ */
+
+typedef enum {
+    TD_NONE,
+    TD_UNKNOWN,
+    TD_SINGLE_TAP,
+    TD_SINGLE_HOLD,
+    TD_DOUBLE_TAP,
+    TD_DOUBLE_HOLD,
+    TD_DOUBLE_SINGLE_TAP, // Send two single taps
+    TD_TRIPLE_TAP,
+    TD_TRIPLE_HOLD
+} td_state_t;
+
+typedef struct {
+    bool is_press_action;
+    td_state_t state;
+} td_tap_t;
+
+// Tap dance enums
+enum {
+    TDM_TABDTSL
+};
+
+td_state_t cur_dance(qk_tap_dance_state_t *state);
+
+// For the tab dual layer switch (nav, media) tap dance. Put it here so it can be used in any keymap
+void tabdtsl_finished(qk_tap_dance_state_t *state, void *user_data);
+void tabdtsl_reset(qk_tap_dance_state_t *state, void *user_data);
+
+/*
+ * Key Maps
+ */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_BASE] = LAYOUT_voyager(
@@ -38,14 +74,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESC,         KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,                                           KC_J,           KC_L,           KC_U,           KC_Y,           KC_SCLN,        KC_NO,
     KC_BSPC,        M_AW,           M_RA,           M_SC,           M_TS,           KC_G,                                           KC_M,           M_NS,           M_EC,           M_IA,           M_OW,           KC_NO,
     KC_DEL,         KC_Z,           M_XA,           KC_C,           KC_D,           KC_V,                                           KC_K,           KC_H,           KC_COMM,        M_DOTA,         KC_SLSH,        KC_NO,
-                                                    LT_TAB,         LT_SPC,                                         LT_ENT,         LT_BSPC
+                                                    LT_SPC,         LT_TAB,                                                         LT_ENT,         LT_BSPC
   ),
   [_GAME] = LAYOUT_voyager(
     KC_ESC,   KC_1,     KC_2,     KC_3,     KC_4,         KC_5,                       KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       KC_F1,
     KC_NO,    KC_Q,     KC_W,     KC_F,     KC_P,         KC_B,                       KC_J,       KC_L,       KC_U,       KC_Y,       KC_SCLN,    KC_F2,
     KC_LSFT,  KC_A,     KC_R,     KC_S,     KC_T,         KC_G,                       KC_M,       KC_N,       KC_E,       KC_I,       KC_O,       KC_F3,
     KC_LCTRL, KC_Z,     KC_A,     KC_C,     KC_D,         KC_V,                       KC_K,       KC_H,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_F4,
-                                            KC_TAB,       KC_SPC,                     KC_ENT,     KC_BSPC
+                                            KC_SPC,       KC_TAB,                     KC_ENT,     KC_BSPC
   ),
   [_NAV] = LAYOUT_voyager(
     KC_NO,    KC_NO,      KC_NO,      KC_NO,    KC_NO,    KC_NO,                      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
@@ -90,3 +126,75 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                 KC_NO,    KC_NO,                      KC_NO,      KC_NO
   )
 };
+
+/*
+ * Tap dance functions credit to https://github.com/danielggordon
+ */
+
+td_state_t cur_dance(qk_tap_dance_state_t *state) {
+    if (state->count == 1) {
+        if (state->interrupted || !state->pressed) return TD_SINGLE_TAP;
+        else return TD_SINGLE_HOLD;
+    } else if (state->count == 2) {
+        if (state->interrupted || !state->pressed) return TD_DOUBLE_TAP;
+        else return TD_DOUBLE_HOLD;
+    }
+
+    // Assumes no one is trying to type the same letter three times (at least not quickly).
+    // If your tap dance key is 'KC_W', and you want to type "www." quickly - then you will need to add
+    // an exception here to return a 'TD_TRIPLE_SINGLE_TAP', and define that enum just like 'TD_DOUBLE_SINGLE_TAP'
+    if (state->count == 3) {
+        if (state->interrupted || !state->pressed) return TD_TRIPLE_TAP;
+        else return TD_TRIPLE_HOLD;
+    } else return TD_UNKNOWN;
+}
+
+/*
+ * Double tap hold TAB Dual Layer switch
+ * If key is pressed: tab
+ * If held: switch nav layer
+ * If tap held: switch media layer
+ */
+static td_tap_t tabdtsl_tap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+void tabdtsl_finished(qk_tap_dance_state_t *state, void *user_data) {
+    tabdtsl_tap_state.state = cur_dance(state);
+    switch (tabdtsl_tap_state.state) {
+        case TD_SINGLE_TAP:
+            tap_code(KC_TAB);
+            break;
+        case TD_SINGLE_HOLD:
+            layer_on(_NAV);
+            break;
+        case TD_DOUBLE_TAP:
+            tap_code(KC_TAB);
+            tap_code(KC_TAB);
+            break;
+        case TD_DOUBLE_HOLD:
+            layer_on(_MEDIA);
+            break;
+        default:
+            break;
+    }
+}
+
+void tabdtsl_reset(qk_tap_dance_state_t *state, void *user_data) {
+    // If the key was held down and now is released then switch off the layer
+    if (tabdtsl_tap_state.state == TD_SINGLE_HOLD) {
+        layer_off(_NAV);
+    }
+    if (tabdtsl_tap_state.state == TD_DOUBLE_HOLD) {
+        layer_off(_MEDIA);
+    }
+    tabdtsl_tap_state.state = TD_NONE;
+}
+
+// Associate our tap dance key with its functionality
+qk_tap_dance_action_t tap_dance_actions[] = {
+    [TDM_TABDTSL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, tabdtsl_finished, tabdtsl_reset)
+};
+
+
