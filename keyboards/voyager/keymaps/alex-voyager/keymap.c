@@ -26,11 +26,13 @@ enum layers {
 #define M_NS MT(MOD_RSFT, KC_N)
 #define M_DOTA MT(MOD_RALT, KC_DOT)
 #define LT_ESC LT(_MEDIA, KC_ESC)
-#define LT_TAB TD(TDM_TABDTSL)
-#define LT_SPC LT(_SYMR, KC_SPC)
+#define LT_TAB LT(_SYMR, KC_SPC)
+#define LT_SPC TD(TDM_NAVMDTSL)
 #define LT_DEL LT(_FUNC, KC_DEL)
 #define LT_BSPC LT(_SYML, KC_BSPC)
 #define LT_ENT LT(_NUM, KC_ENT)
+#define TDK_NOGAME TD(TDM_NOGAMEMO)
+#define TDK_5BASE TD(TDM_5BASEMO)
 
 /*
  * Tap Dance Defs
@@ -55,14 +57,21 @@ typedef struct {
 
 // Tap dance enums
 enum {
-    TDM_TABDTSL
+    TDM_NAVMDTSL,
+    TDM_NFUNDTSL,
+    TDM_NOGAMEMO,
+    TDM_5BASEMO
 };
 
 td_state_t cur_dance(qk_tap_dance_state_t *state);
 
-// For the tab dual layer switch (nav, media) tap dance. Put it here so it can be used in any keymap
-void tabdtsl_finished(qk_tap_dance_state_t *state, void *user_data);
-void tabdtsl_reset(qk_tap_dance_state_t *state, void *user_data);
+// For the dual layer switch (nav, media) tap dance.
+void navmdtsl_finished(qk_tap_dance_state_t *state, void *user_data);
+void navmdtsl_reset(qk_tap_dance_state_t *state, void *user_data);
+
+// For the backspace dual layer switch (numpad, functions)
+void nfundtsl_finished(qk_tap_dance_state_t *state, void *user_data);
+void nfundtsl_reset(qk_tap_dance_state_t *state, void *user_data);
 
 /*
  * Key Maps
@@ -70,18 +79,18 @@ void tabdtsl_reset(qk_tap_dance_state_t *state, void *user_data);
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_BASE] = LAYOUT_voyager(
-    KC_NO,          KC_NO,          KC_NO,          KC_NO,          KC_NO,          KC_NO,                                          KC_NO,          KC_NO,          KC_NO,          KC_NO,          KC_NO,          KC_NO,
+    KC_NO,          KC_NO,          KC_NO,          KC_NO,          KC_NO,          TDK_NOGAME,                                     KC_NO,          KC_NO,          KC_NO,          KC_NO,          KC_NO,          KC_NO,
     KC_ESC,         KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,                                           KC_J,           KC_L,           KC_U,           KC_Y,           KC_SCLN,        KC_NO,
     KC_BSPC,        M_AW,           M_RA,           M_SC,           M_TS,           KC_G,                                           KC_M,           M_NS,           M_EC,           M_IA,           M_OW,           KC_NO,
     KC_DEL,         KC_Z,           M_XA,           KC_C,           KC_D,           KC_V,                                           KC_K,           KC_H,           KC_COMM,        M_DOTA,         KC_SLSH,        KC_NO,
                                                     LT_TAB,         LT_SPC,                                                         LT_ENT,         LT_BSPC
   ),
   [_GAME] = LAYOUT_voyager(
-    KC_ESC,   KC_1,     KC_2,     KC_3,     KC_4,         KC_5,                       KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       KC_F1,
-    KC_NO,    KC_Q,     KC_W,     KC_F,     KC_P,         KC_B,                       KC_J,       KC_L,       KC_U,       KC_Y,       KC_SCLN,    KC_F2,
+    KC_ESC,   KC_1,     KC_2,     KC_3,     KC_4,         TDK_5BASE,                  KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       KC_F1,
+    KC_TAB,   KC_Q,     KC_W,     KC_F,     KC_P,         KC_B,                       KC_J,       KC_L,       KC_U,       KC_Y,       KC_SCLN,    KC_F2,
     KC_LSFT,  KC_A,     KC_R,     KC_S,     KC_T,         KC_G,                       KC_M,       KC_N,       KC_E,       KC_I,       KC_O,       KC_F3,
     KC_LCTRL, KC_Z,     KC_A,     KC_C,     KC_D,         KC_V,                       KC_K,       KC_H,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_F4,
-                                            KC_SPC,       KC_TAB,                     KC_ENT,     KC_BSPC
+                                            KC_LALT,      KC_SPC,                     KC_ENT,     KC_BSPC
   ),
   [_NAV] = LAYOUT_voyager(
     KC_NO,    KC_NO,      KC_NO,      KC_NO,    KC_NO,    KC_NO,                      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
@@ -136,8 +145,9 @@ td_state_t cur_dance(qk_tap_dance_state_t *state) {
         if (state->interrupted || !state->pressed) return TD_SINGLE_TAP;
         else return TD_SINGLE_HOLD;
     } else if (state->count == 2) {
-        if (state->interrupted || !state->pressed) return TD_DOUBLE_TAP;
-        else return TD_DOUBLE_HOLD;
+        if (state->interrupted) return TD_DOUBLE_SINGLE_TAP;
+        else if (state->pressed) return TD_DOUBLE_HOLD;
+        else return TD_DOUBLE_TAP;
     }
 
     // Assumes no one is trying to type the same letter three times (at least not quickly).
@@ -155,23 +165,23 @@ td_state_t cur_dance(qk_tap_dance_state_t *state) {
  * If held: switch nav layer
  * If tap held: switch media layer
  */
-static td_tap_t tabdtsl_tap_state = {
+static td_tap_t navmdtsl_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
 
-void tabdtsl_finished(qk_tap_dance_state_t *state, void *user_data) {
-    tabdtsl_tap_state.state = cur_dance(state);
-    switch (tabdtsl_tap_state.state) {
+void navmdtsl_finished(qk_tap_dance_state_t *state, void *user_data) {
+    navmdtsl_tap_state.state = cur_dance(state);
+    switch (navmdtsl_tap_state.state) {
         case TD_SINGLE_TAP:
             tap_code(KC_TAB);
             break;
         case TD_SINGLE_HOLD:
             layer_on(_NAV);
             break;
-        case TD_DOUBLE_TAP:
+        case TD_DOUBLE_SINGLE_TAP:
             tap_code(KC_TAB);
-            tap_code(KC_TAB);
+            register_code(KC_TAB);
             break;
         case TD_DOUBLE_HOLD:
             layer_on(_MEDIA);
@@ -181,20 +191,72 @@ void tabdtsl_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void tabdtsl_reset(qk_tap_dance_state_t *state, void *user_data) {
+void navmdtsl_reset(qk_tap_dance_state_t *state, void *user_data) {
     // If the key was held down and now is released then switch off the layer
-    if (tabdtsl_tap_state.state == TD_SINGLE_HOLD) {
+    if (navmdtsl_tap_state.state == TD_SINGLE_HOLD) {
         layer_off(_NAV);
     }
-    if (tabdtsl_tap_state.state == TD_DOUBLE_HOLD) {
+    if (navmdtsl_tap_state.state == TD_DOUBLE_HOLD) {
         layer_off(_MEDIA);
     }
-    tabdtsl_tap_state.state = TD_NONE;
+    navmdtsl_tap_state.state = TD_NONE;
 }
+
+/*
+ * Double tap hold TAB Dual Layer switch
+ * If key is pressed: tab
+ * If held: switch nav layer
+ * If tap held: switch media layer
+ */
+static td_tap_t nfundtsl_tap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+void nfundtsl_finished(qk_tap_dance_state_t *state, void *user_data) {
+    nfundtsl_tap_state.state = cur_dance(state);
+    switch (navmdtsl_tap_state.state) {
+        case TD_SINGLE_TAP:
+            tap_code(KC_BSPC);
+            break;
+        case TD_SINGLE_HOLD:
+            layer_on(_NUM);
+            break;
+        case TD_DOUBLE_SINGLE_TAP:
+            tap_code(KC_BSPC);
+            register_code(KC_BSPC);
+            break;
+        case TD_DOUBLE_HOLD:
+            layer_on(_FUNC);
+            break;
+        default:
+            break;
+    }
+}
+
+void nfundtsl_reset(qk_tap_dance_state_t *state, void *user_data) {
+    // If the key was held down and now is released then switch off the layer
+    if (nfundtsl_tap_state.state == TD_SINGLE_HOLD) {
+        layer_off(_NUM);
+    }
+    if (nfundtsl_tap_state.state == TD_DOUBLE_HOLD) {
+        layer_off(_FUNC);
+    }
+    nfundtsl_tap_state.state = TD_NONE;
+}
+
+/*
+ * Switch to Gaming Layer
+ * If key is pressed: Nothing
+ * If key is double tapped: switch to gaming layer
+ */
 
 // Associate our tap dance key with its functionality
 qk_tap_dance_action_t tap_dance_actions[] = {
-    [TDM_TABDTSL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, tabdtsl_finished, tabdtsl_reset)
+    [TDM_NAVMDTSL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, navmdtsl_finished, navmdtsl_reset),
+    [TDM_NFUNDTSL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, nfundtsl_finished, nfundtsl_reset),
+    [TDM_NOGAMEMO] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _GAME),
+    [TDM_5BASEMO] = ACTION_TAP_DANCE_LAYER_MOVE(KC_5, _BASE)
 };
 
 
