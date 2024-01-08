@@ -26,7 +26,7 @@ enum layers {
 #define M_NS MT(MOD_RSFT, KC_N)
 #define M_DOTA MT(MOD_RALT, KC_DOT)
 #define LT_ESC LT(_MEDIA, KC_ESC)
-#define LT_TAB LT(_SYMR, KC_SPC)
+#define LT_TAB LT(_SYMR, KC_TAB)
 #define LT_SPC TD(TDM_NAVMDTSL)
 #define LT_DEL LT(_FUNC, KC_DEL)
 #define LT_BSPC LT(_SYML, KC_BSPC)
@@ -120,7 +120,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_NO,    KC_GRV,     KC_1,       KC_2,     KC_3,     KC_BSLS,                    KC_NO,      KC_NO,      KC_NO,      KC_NO,    KC_NO,      KC_NO,
                                                 KC_NO,    KC_NO,                      KC_NO,      KC_NO
   ),
-  [_SYMR] = LAYOUT_voyager(
+  [_SYML] = LAYOUT_voyager(
     KC_NO,    KC_NO,      KC_NO,      KC_NO,    KC_NO,    KC_NO,                      KC_NO,      KC_NO,      KC_NO,      KC_NO,    KC_NO,      KC_NO,
     KC_NO,    KC_NO,      KC_AMPR,    KC_LABK,  KC_RABK,  KC_CIRC,                    KC_NO,      KC_NO,      KC_NO,      KC_NO,    QK_RBT,     KC_NO,
     KC_NO,    KC_NO,      KC_TILD,    KC_COLN,  KC_SCLN,  KC_ASTR,                    KC_NO,      KC_LSFT,    KC_LCTL,    KC_LALT,  KC_LGUI,    KC_NO,
