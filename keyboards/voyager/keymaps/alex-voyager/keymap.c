@@ -26,8 +26,8 @@ enum layers {
 #define M_NS MT(MOD_RSFT, KC_N)
 #define M_DOTA MT(MOD_RALT, KC_DOT)
 #define LT_ESC LT(_MEDIA, KC_ESC)
-#define LT_TAB LT(_SYMR, KC_TAB)
-#define LT_SPC TD(TDM_NAVMDTSL)
+#define LT_SPC LT(_SYMR, KC_SPC)
+#define LT_TAB TD(TDM_NAVMDTSL)
 #define LT_DEL LT(_FUNC, KC_DEL)
 #define LT_BSPC LT(_SYML, KC_BSPC)
 #define LT_ENT LT(_NUM, KC_ENT)
@@ -83,14 +83,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_ESC,         KC_Q,           KC_W,           KC_F,           KC_P,           KC_B,                                           KC_J,           KC_L,           KC_U,           KC_Y,           KC_SCLN,        KC_NO,
     KC_BSPC,        M_AW,           M_RA,           M_SC,           M_TS,           KC_G,                                           KC_M,           M_NS,           M_EC,           M_IA,           M_OW,           KC_NO,
     KC_DEL,         KC_Z,           M_XA,           KC_C,           KC_D,           KC_V,                                           KC_K,           KC_H,           KC_COMM,        M_DOTA,         KC_SLSH,        KC_NO,
-                                                    LT_TAB,         LT_SPC,                                                         LT_ENT,         LT_BSPC
+                                                    LT_SPC,         LT_TAB,                                                         LT_ENT,         LT_BSPC
   ),
   [_GAME] = LAYOUT_voyager(
     KC_ESC,   KC_1,     KC_2,     KC_3,     KC_4,         TDK_5BASE,                  KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       KC_F1,
     KC_TAB,   KC_Q,     KC_W,     KC_F,     KC_P,         KC_B,                       KC_J,       KC_L,       KC_U,       KC_Y,       KC_SCLN,    KC_F2,
     KC_LSFT,  KC_A,     KC_R,     KC_S,     KC_T,         KC_G,                       KC_M,       KC_N,       KC_E,       KC_I,       KC_O,       KC_F3,
     KC_LCTRL, KC_Z,     KC_A,     KC_C,     KC_D,         KC_V,                       KC_K,       KC_H,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_F4,
-                                            KC_LALT,      KC_SPC,                     KC_ENT,     KC_BSPC
+                                            KC_SPC,       KC_LALT,                    KC_ENT,     KC_BSPC
   ),
   [_NAV] = LAYOUT_voyager(
     KC_NO,    KC_NO,      KC_NO,      KC_NO,    KC_NO,    KC_NO,                      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
