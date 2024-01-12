@@ -12,6 +12,10 @@ enum layers {
     _FUNC
 };
 
+enum keycodes {
+    RGB_BIZTOG = SAFE_RANGE
+};
+
 /*
  * Base Taps
  */
@@ -74,12 +78,23 @@ void nfundtsl_finished(qk_tap_dance_state_t *state, void *user_data);
 void nfundtsl_reset(qk_tap_dance_state_t *state, void *user_data);
 
 /*
+ * Business RGB toggle defs
+ */
+typedef struct {
+    bool    enabled;
+    uint8_t mode;
+    HSV     color;
+} business_state_t;
+
+business_state_t rgb_business_state = {.enabled = false};
+
+/*
  * Key Maps
  */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_BASE] = LAYOUT_voyager(
-    KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,        TDK_NOGAME,                 KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
+    KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,        TDK_NOGAME,                 KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      RGB_BIZTOG,
     KC_ESC,   KC_Q,     KC_W,     KC_F,     KC_P,         KC_B,                       KC_J,       KC_L,       KC_U,       KC_Y,       KC_QUOT,    KC_NO,
     KC_BSPC,  M_AW,     M_RA,     M_SC,     M_TS,         KC_G,                       KC_M,       M_NS,       M_EC,       M_IA,       M_OW,       KC_NO,
     KC_DEL,   KC_Z,     M_XA,     KC_C,     KC_D,         KC_V,                       KC_K,       KC_H,       KC_COMM,    M_DOTA,     KC_SLSH,    KC_NO,
@@ -135,6 +150,33 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                 KC_NO,    KC_NO,                      KC_NO,      KC_NO
   )
 };
+
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case RGB_BIZTOG:
+            if (record->event.pressed) {
+                if (rgb_business_state.enabled == false) {
+                    // save current state, to restore later
+                    rgb_business_state.mode  = rgb_matrix_get_mode();
+                    rgb_business_state.color = rgb_matrix_get_hsv();
+
+                    // configure static white
+                    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
+                    rgb_matrix_sethsv_noeeprom(HSV_WHITE);
+                } else {
+                    // restore
+                    rgb_matrix_mode_noeeprom(rgb_business_state.mode);
+                    rgb_matrix_sethsv_noeeprom(rgb_business_state.color.h, rgb_business_state.color.s, rgb_business_state.color.v);
+                }
+                rgb_business_state.enabled = !rgb_business_state.enabled;
+            }
+            return false;
+
+        default:
+            return true;
+    }
+}
 
 /*
  * Tap dance functions credit to https://github.com/danielggordon
