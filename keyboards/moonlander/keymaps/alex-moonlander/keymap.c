@@ -1,4 +1,3 @@
-
 #include QMK_KEYBOARD_H
 #include "version.h"
 
@@ -38,6 +37,22 @@ enum keycodes {
 #define LT_ENT LT(_NUM, KC_ENT)
 #define TDK_NOGAME TD(TDM_NOGAMEMO)
 #define TDK_5BASE TD(TDM_5BASEMO)
+
+/*
+ * Tap Dance Defs
+ */
+
+typedef enum {
+    TD_NONE,
+    TD_UNKNOWN,
+    TD_SINGLE_TAP,
+    TD_SINGLE_HOLD,
+    TD_DOUBLE_TAP,
+    TD_DOUBLE_HOLD,
+    TD_DOUBLE_SINGLE_TAP, // Send two single taps
+    TD_TRIPLE_TAP,
+    TD_TRIPLE_HOLD
+} td_state_t;
 
 typedef struct {
     bool is_press_action;
@@ -96,7 +111,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_NAV] = LAYOUT_moonlander(
         KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,        KC_NO,    KC_NO,                                  KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
         KC_NO,    QK_RBT,   KC_NO,    KC_NO,    KC_NO,        KC_NO,    KC_NO,                                  KC_NO,      KC_AGIN,    KC_UNDO,    KC_CUT,     KC_COPY,    KC_PSTE,    KC_NO,
-        KC_NO,    KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,      KC_NO     KC_NO,                                  KC_NO,      KC_CAPS,    KC_LEFT,    KC_DOWN,    KC_UP,      KC_RGHT,    KC_NO,
+        KC_NO,    KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,      KC_NO,    KC_NO,                                  KC_NO,      KC_CAPS,    KC_LEFT,    KC_DOWN,    KC_UP,      KC_RGHT,    KC_NO,
         KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,        KC_NO,                                                        KC_INS,     KC_HOME,    KC_PGDN,    KC_PGUP,    KC_END,     KC_NO,
         KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,                  KC_NO,                                  KC_TRNS,                KC_TRNS,    KC_TRNS,    KC_TRNS,    KC_TRNS,    KC_TRNS,
                                                               KC_NO,    KC_NO,      KC_NO,           KC_NO,     KC_NO,      KC_NO
@@ -104,7 +119,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_MEDIA] = LAYOUT_moonlander(
         KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,        KC_NO,    KC_NO,                                  KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
         KC_NO,    QK_RBT,   KC_NO,    KC_NO,    KC_NO,        KC_NO,    KC_NO,                                  KC_NO,      RGB_MOD,    RGB_HUI,    RGB_SAI,    RGB_VAI,    RGB_TOG,    KC_NO,
-        KC_NO,    KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,      KC_NO     KC_NO,                                  KC_NO,      KC_NO,      KC_MPRV,    KC_VOLD,    KC_VOLU,    KC_MNXT,    KC_NO,
+        KC_NO,    KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,      KC_NO,    KC_NO,                                  KC_NO,      KC_NO,      KC_MPRV,    KC_VOLD,    KC_VOLU,    KC_MNXT,    KC_NO,
         KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,        KC_NO,                                                        KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
         KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,                  KC_NO,                                  KC_TRNS,                KC_TRNS,    KC_TRNS,    KC_TRNS,    KC_TRNS,    KC_TRNS,
                                                               KC_NO,    KC_NO,      KC_NO,           KC_NO,     KC_MSTP,    KC_MPLY
@@ -112,7 +127,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_SYMR] = LAYOUT_moonlander(
         KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,        KC_NO,    KC_NO,                                  KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
         KC_NO,    QK_RBT,   KC_NO,    KC_NO,    KC_NO,        KC_NO,    KC_NO,                                  KC_NO,      KC_PLUS,    KC_LBRC,    KC_RBRC,    KC_BSLS,    KC_DQT,     KC_NO,
-        KC_NO,    KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,      KC_NO     KC_NO,                                  KC_NO,      KC_MINS,    KC_LPRN,    KC_RPRN,    KC_EXLM,    KC_EQL,     KC_NO,
+        KC_NO,    KC_LGUI,  KC_LALT,  KC_LCTL,  KC_LSFT,      KC_NO,    KC_NO,                                  KC_NO,      KC_MINS,    KC_LPRN,    KC_RPRN,    KC_EXLM,    KC_EQL,     KC_NO,
         KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,        KC_NO,                                                        KC_PERC,    KC_LCBR,    KC_RCBR,    KC_PIPE,    KC_UNDS,    KC_NO,
         KC_NO,    KC_NO,    KC_NO,    KC_NO,    KC_NO,                  KC_NO,                                  KC_TRNS,                KC_TRNS,    KC_TRNS,    KC_TRNS,    KC_TRNS,    KC_TRNS,
                                                               KC_NO,    KC_NO,      KC_NO,           KC_NO,     KC_NO,      KC_NO
