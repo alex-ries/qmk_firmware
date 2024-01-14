@@ -98,7 +98,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_BSPC,  M_AW,     M_RA,     M_SC,     M_TS,         KC_G,     KC_NO,                                  KC_NO,      KC_M,       M_NS,       M_EC,       M_IA,       M_OW,       KC_NO,
         KC_DEL,   KC_Z,     M_XA,     KC_C,     KC_D,         KC_V,                                                         KC_K,       KC_H,       KC_COMM,    M_DOTA,     KC_SLSH,    KC_NO,
         KC_NO,    KC_NO,    KC_NO,    KC_LEFT,  KC_RGHT,                KC_NO,                                  KC_NO,                  KC_UP,      KC_DOWN,    KC_NO,      KC_NO,      KC_NO,
-                                                              LT_SPC,   LT_TAB,     KC_LGUI,        KC_LALT,    LT_ENT,     LT_BSPC
+                                                              LT_SPC,   LT_TAB,     KC_LGUI,        KC_LALT,    LT_BSPC,    LT_ENT
     ),
     [_GAME] = LAYOUT_moonlander(
         KC_ESC,   KC_1,     KC_2,     KC_3,     KC_4,         KC_5,     TDK_5BASE,                              KC_NO,      KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       KC_F1,
