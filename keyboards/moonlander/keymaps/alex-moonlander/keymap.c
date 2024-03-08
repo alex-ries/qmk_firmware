@@ -38,7 +38,7 @@ enum keycodes {
 #define LT_ENT LT(_SYML, KC_ENT)
 #define TK_NUMFUN TD(TDM_NFUNDTSL)
 #define TDK_NOGAME TD(TDM_NOGAMEMO)
-#define TDK_5BASE TD(TDM_5BASEMO)
+#define TDK_NOBASE TD(TDM_NOBASEMO)
 
 /*
  * Tap Dance Defs
@@ -66,7 +66,7 @@ enum {
     TDM_NAVMDTSL,
     TDM_NFUNDTSL,
     TDM_NOGAMEMO,
-    TDM_5BASEMO
+    TDM_NOBASEMO
 };
 
 td_state_t cur_dance(qk_tap_dance_state_t *state);
@@ -103,7 +103,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                               LT_SPC,   TK_NAVMEDIA, LT_ESC,        KC_LALT,    TK_NUMFUN,  LT_ENT
     ),
     [_GAME] = LAYOUT_moonlander(
-        KC_ESC,   KC_1,     KC_2,     KC_3,     KC_4,         KC_5,     TDK_5BASE,                              KC_NO,      KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       KC_F1,
+        KC_ESC,   KC_1,     KC_2,     KC_3,     KC_4,         KC_5,     TDK_NOBASE,                              KC_NO,      KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       KC_F1,
         KC_TAB,   KC_Q,     KC_W,     KC_F,     KC_P,         KC_B,     KC_NO,                                  KC_NO,      KC_J,       KC_L,       KC_U,       KC_Y,       KC_QUOT,    KC_F2,
         KC_LSFT,  KC_A,     KC_R,     KC_S,     KC_T,         KC_G,     KC_MEH,                                 KC_MEH,     KC_M,       KC_N,       KC_E,       KC_I,       KC_O,       KC_F3,
         KC_LCTRL, KC_Z,     KC_X,     KC_C,     KC_D,         KC_V,                                                         KC_K,       KC_H,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_F4,
@@ -266,7 +266,7 @@ static td_tap_t nfundtsl_tap_state = {
 
 void nfundtsl_finished(qk_tap_dance_state_t *state, void *user_data) {
     nfundtsl_tap_state.state = cur_dance(state);
-    switch (navmdtsl_tap_state.state) {
+    switch (nfundtsl_tap_state.state) {
         case TD_SINGLE_TAP:
             tap_code(KC_BSPC);
             break;
@@ -307,7 +307,7 @@ qk_tap_dance_action_t tap_dance_actions[] = {
     [TDM_NAVMDTSL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, navmdtsl_finished, navmdtsl_reset),
     [TDM_NFUNDTSL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, nfundtsl_finished, nfundtsl_reset),
     [TDM_NOGAMEMO] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _GAME),
-    [TDM_5BASEMO] = ACTION_TAP_DANCE_LAYER_MOVE(KC_5, _BASE)
+    [TDM_NOBASEMO] = ACTION_TAP_DANCE_LAYER_MOVE(KC_NO, _BASE)
 };
 
 
